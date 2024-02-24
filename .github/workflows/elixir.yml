@@ -14,3 +14,4 @@ jobs:
       HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
     with:
       spark-formatter: false
+      spark-cheat-sheets: false

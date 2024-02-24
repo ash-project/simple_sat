@@ -41,7 +41,7 @@ defmodule SimpleSat.MixProject do
 
   defp package do
     [
-      name: :ash,
+      name: :simple_sat,
       licenses: ["MIT"],
       files: ~w(lib .formatter.exs mix.exs README* LICENSE* CHANGELOG*),
       links: %{

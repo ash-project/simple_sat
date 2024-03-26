@@ -9,7 +9,7 @@ See the [documentation](https://hexdocs.pm/simple_sat) for more.
 ```elixir
 def deps do
   [
-    {:simple_sat, "~> 0.1.0"}
+    {:simple_sat, "~> 0.1.1"}
   ]
 end
 ```

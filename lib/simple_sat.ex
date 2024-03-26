@@ -47,7 +47,7 @@ defmodule SimpleSat do
 
     Enum.find_value(all_vars, {:error, :unsatisfiable}, fn var ->
       if solution = find_solution(var, all_vars -- [var], statements) do
-        {:ok, solution}
+        {:ok, Enum.sort_by(solution, &abs/1)}
       end
     end)
   end

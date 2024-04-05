@@ -56,6 +56,7 @@ defmodule SimpleSat do
     statements_with_true =
       guess_value(statements, var, true)
 
+
     case simplify(statements_with_true) do
       true ->
         [var | trail]
@@ -66,7 +67,7 @@ defmodule SimpleSat do
 
         case simplify(statements_with_false) do
           true ->
-            [var | trail]
+            [-var | trail]
 
           false ->
             nil
@@ -126,7 +127,7 @@ defmodule SimpleSat do
       if Enum.all?(statement, &false?/1) do
         false
       else
-        statement
+        Enum.reject(statement, &false?/1)
       end
     end
   end

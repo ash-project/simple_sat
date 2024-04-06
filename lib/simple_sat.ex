@@ -56,7 +56,6 @@ defmodule SimpleSat do
     statements_with_true =
       guess_value(statements, var, true)
 
-
     case simplify(statements_with_true) do
       true ->
         [var | trail]

@@ -8,7 +8,7 @@ defmodule SimpleSat.MixProject do
     [
       app: :simple_sat,
       version: @version,
-      elixir: "~> 1.16",
+      elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
       description: @description,
       source_url: "https://github.com/ash-project/simple_sat",

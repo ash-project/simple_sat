@@ -25,7 +25,8 @@ defmodule SimpleSatTest do
 
   @tag :regression
   test "solves this properly" do
-    assert {:ok, [1, 2, 3, 4, -5, -6]} = SimpleSat.solve([[1], [-6], [-5], [4], [3], [1, 2]]) |> IO.inspect()
+    assert {:ok, [1, 2, 3, 4, -5, -6]} =
+             SimpleSat.solve([[1], [-6], [-5], [4], [3], [1, 2]]) |> IO.inspect()
   end
 
   test "solves this crazy example" do

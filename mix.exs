@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 defmodule SimpleSat.MixProject do
   use Mix.Project
 
@@ -41,14 +45,18 @@ defmodule SimpleSat.MixProject do
 
   defp package do
     [
-      name: :simple_sat,
+      maintainers: [
+        "Zach Daniel <zach@zachdaniel.dev>"
+      ],
       licenses: ["MIT"],
       files: ~w(lib .formatter.exs mix.exs README* LICENSE* CHANGELOG*),
       links: %{
-        GitHub: "https://github.com/ash-project/simple_sat",
-        Discord: "https://discord.gg/HTHRaaVPUc",
-        Website: "https://ash-hq.org",
-        Forum: "https://elixirforum.com/c/elixir-framework-forums/ash-framework-forum"
+        "GitHub" => "https://github.com/ash-project/simple_sat",
+        "Changelog" => "https://github.com/ash-project/simple_sat/blob/main/CHANGELOG.md",
+        "Discord" => "https://discord.gg/HTHRaaVPUc",
+        "Website" => "https://ash-hq.org",
+        "Forum" => "https://elixirforum.com/c/elixir-framework-forums/ash-framework-forum",
+        "REUSE Compliance" => "https://api.reuse.software/info/github.com/ash-project/simple_sat"
       }
     ]
   end
@@ -68,6 +76,7 @@ defmodule SimpleSat.MixProject do
       {:ex_check, "~> 0.12", only: [:dev, :test]},
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:dialyxir, ">= 0.0.0", only: [:dev, :test], runtime: false},
+      {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
       {:sobelow, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:git_ops, "~> 2.5", only: [:dev, :test]},
       {:doctor, "~> 0.21", only: [:dev, :test]}

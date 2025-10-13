@@ -20,3 +20,4 @@ jobs:
       spark-formatter: false
       spark-cheat-sheets: false
       reuse: true
+      igniter-upgrade: false

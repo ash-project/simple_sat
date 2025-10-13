@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 defmodule SimpleSatTest do
   use ExUnit.Case
   doctest SimpleSat
@@ -26,7 +30,7 @@ defmodule SimpleSatTest do
   @tag :regression
   test "solves this properly" do
     assert {:ok, [1, 2, 3, 4, -5, -6]} =
-             SimpleSat.solve([[1], [-6], [-5], [4], [3], [1, 2]]) |> IO.inspect()
+             SimpleSat.solve([[1], [-6], [-5], [4], [3], [1, 2]])
   end
 
   test "solves this crazy example" do

@@ -22,7 +22,7 @@ See the [documentation](https://hexdocs.pm/simple_sat) for more.
 ```elixir
 def deps do
   [
-    {:simple_sat, "~> 0.1.3"}
+    {:simple_sat, "~> 0.1.4"}
   ]
 end
 ```

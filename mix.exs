@@ -6,7 +6,7 @@ defmodule SimpleSat.MixProject do
   use Mix.Project
 
   @description "A simple, dependency free boolean satisfiability solver."
-  @version "0.1.3"
+  @version "0.1.4"
 
   def project do
     [

@@ -79,7 +79,9 @@ defmodule SimpleSat.MixProject do
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
       {:sobelow, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:git_ops, "~> 2.5", only: [:dev, :test]},
-      {:doctor, "~> 0.21", only: [:dev, :test]}
+      {:doctor, "~> 0.21", only: [:dev, :test]},
+      {:picosat_elixir, "~> 0.2", only: [:dev, :test]},
+      {:stream_data, "~> 1.2", only: [:dev, :test]}
     ]
   end
 end

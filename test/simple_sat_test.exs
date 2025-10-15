@@ -31,6 +31,9 @@ defmodule SimpleSatTest do
   test "solves this properly" do
     assert {:ok, [1, 2, 3, 4, -5, -6]} =
              SimpleSat.solve([[1], [-6], [-5], [4], [3], [1, 2]])
+
+    assert {:ok, [-1, 2, -3, 4, -5]} =
+             SimpleSat.solve([[2], [-3], [4, 5], [-4, -1], [-5, -2], [-5, -3]])
   end
 
   test "solves this crazy example" do

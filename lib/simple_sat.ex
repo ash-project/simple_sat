@@ -35,6 +35,9 @@ defmodule SimpleSat do
   Provide a valid solution for a statement in CNF form
   """
   @spec solve([[integer]]) :: {:ok, [integer]} | {:error, :unsatisfiable}
+  def solve(clauses)
+  def solve([]), do: {:ok, []}
+
   def solve(cnf_integer) do
     {statements, all_vars} =
       cnf_integer
@@ -57,44 +60,41 @@ defmodule SimpleSat do
   end
 
   defp find_solution(var, other_vars, statements, trail \\ []) do
-    statements_with_true =
-      guess_value(statements, var, true)
-
-    case simplify(statements_with_true) do
+    # --- Try var = true
+    case simplify(guess_value(statements, var, true)) do
       true ->
         [var | trail]
 
       false ->
-        statements_with_false =
-          guess_value(statements, var, false)
+        # fall through and try var = false
+        try_false(var, other_vars, statements, trail)
 
-        case simplify(statements_with_false) do
-          true ->
-            [-var | trail]
-
-          false ->
-            nil
-
-          simplified_statements ->
-            case other_vars do
-              [] ->
-                nil
-
-              [next_var | rest] ->
-                find_solution(next_var, rest, simplified_statements, [-var | trail])
-            end
-        end
-
-      simplified_statements ->
-        case other_vars do
-          [] ->
-            nil
-
-          [next_var | rest] ->
-            find_solution(next_var, rest, simplified_statements, [var | trail])
+      simp_true ->
+        case branch(other_vars, simp_true, [var | trail]) do
+          # <— BACKTRACK
+          nil -> try_false(var, other_vars, statements, trail)
+          sol -> sol
         end
     end
   end
+
+  defp try_false(var, other_vars, statements, trail) do
+    case simplify(guess_value(statements, var, false)) do
+      true ->
+        [-var | trail]
+
+      false ->
+        nil
+
+      simp_false ->
+        branch(other_vars, simp_false, [-var | trail])
+    end
+  end
+
+  defp branch([], _simp, _trail), do: nil
+
+  defp branch([next | rest], simp, trail),
+    do: find_solution(next, rest, simp, trail)
 
   defp simplify(statements) do
     statements

@@ -4,6 +4,8 @@
 
 defmodule SimpleSatTest do
   use ExUnit.Case
+  use ExUnitProperties
+
   doctest SimpleSat
 
   test "solves a single variable statement" do
@@ -31,6 +33,9 @@ defmodule SimpleSatTest do
   test "solves this properly" do
     assert {:ok, [1, 2, 3, 4, -5, -6]} =
              SimpleSat.solve([[1], [-6], [-5], [4], [3], [1, 2]])
+
+    assert {:ok, [-1, 2, -3, 4, -5]} =
+             SimpleSat.solve([[2], [-3], [4, 5], [-4, -1], [-5, -2], [-5, -3]])
   end
 
   test "solves this crazy example" do
@@ -45,5 +50,29 @@ defmodule SimpleSatTest do
       [1, 2],
       [-7, -6, 5, 4, 3, -1, -2]
     ])
+  end
+
+  property "gives same unsat / sat status as Picosat" do
+    variable = StreamData.filter(StreamData.integer(-5..5), &(&1 != 0))
+
+    check all(
+            statements <-
+              list_of(list_of(variable, min_length: 1, max_length: 10),
+                min_length: 0,
+                max_length: 10
+              ),
+            max_runs: 100_000
+          ) do
+      case SimpleSat.solve(statements) do
+        {:ok, []} ->
+          assert {:ok, []} = Picosat.solve(statements)
+
+        {:ok, solution} ->
+          assert {:ok, _} = Picosat.solve(statements ++ [solution])
+
+        {:error, :unsatisfiable} ->
+          assert {:error, :unsatisfiable} = Picosat.solve(statements)
+      end
+    end
   end
 end

@@ -6,10 +6,9 @@
 updates:
   - directory: /
     groups:
-      dev-dependencies:
-        dependency-type: development
-      production-dependencies:
-        dependency-type: production
+      all-dependencies:
+        patterns:
+          - '*'
     package-ecosystem: mix
     schedule:
       interval: monthly
@@ -19,7 +18,7 @@ updates:
       github-actions:
         applies-to: version-updates
         patterns:
-          - "*"
+          - '*'
     package-ecosystem: github-actions
     schedule:
       interval: monthly

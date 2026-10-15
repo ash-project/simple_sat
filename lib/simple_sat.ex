@@ -4,7 +4,7 @@
 
 defmodule SimpleSat do
   @moduledoc """
-  A simple, dependency free boolean satisfiability solver.
+  A simple, dependency free boolean satisfiability solver implementing DPLL search.
 
   This was created for folks having trouble running `picosat_elixir`
   to use as a drop-in replacement for Ash Framework, but feel free to use it in
@@ -16,8 +16,8 @@ defmodule SimpleSat do
 
   Additionally, SimpleSat expects to receive variables in "Conjunctive Normal Form" or CNF.
   This is the same interface that `picosat_elixir` expects. CNF is a conjunction of disjunctions.
-  In other words, it is a list of statements that must *all be true*, where each statement is a list of
-  variables where at *least one must be true*. For example:
+  In other words, it is a list of clauses that must *all be true*, where each clause is a list of
+  literals where at *least one must be true*. For example:
 
   ```elixir
   # A AND (NOT A)
@@ -32,7 +32,25 @@ defmodule SimpleSat do
   """
 
   @doc """
-  Provide a valid solution for a statement in CNF form
+  Finds a satisfying assignment for a formula in CNF.
+
+  Takes a list of clauses, where each clause is a list of non-zero integers
+  (literals). Returns `{:ok, solution}` with one literal per variable, sorted by
+  variable. Variables whose value doesn't affect the result are set to true.
+
+  Returns `{:error, :unsatisfiable}` when no assignment satisfies every clause,
+  including when any clause is empty.
+
+  ## Examples
+
+      iex> SimpleSat.solve([[1, 2, -3], [2, 3], [-2], [-1, 3]])
+      {:ok, [1, -2, 3]}
+
+      iex> SimpleSat.solve([[1], [1, 2]])
+      {:ok, [1, 2]}
+
+      iex> SimpleSat.solve([[1], [-1]])
+      {:error, :unsatisfiable}
   """
   @spec solve([[integer]]) :: {:ok, [integer]} | {:error, :unsatisfiable}
   def solve(clauses)

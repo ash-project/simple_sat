@@ -38,140 +38,115 @@ defmodule SimpleSat do
   def solve(clauses)
   def solve([]), do: {:ok, []}
 
-  def solve(cnf_integer) do
-    {statements, all_vars} =
-      cnf_integer
-      |> Enum.reduce({[], []}, fn statement, {statements, all_vars} ->
-        {statement, all_vars} =
-          Enum.reduce(statement, {[], all_vars}, fn var, {statement, all_vars} ->
-            {[variable(var) | statement], [abs(var) | all_vars]}
-          end)
+  def solve(clauses) do
+    if Enum.any?(clauses, &(&1 == [])) do
+      {:error, :unsatisfiable}
+    else
+      case dpll(clauses, %{}) do
+        nil ->
+          {:error, :unsatisfiable}
 
-        {[statement | statements], all_vars}
-      end)
+        assignment ->
+          solution =
+            clauses
+            |> complete(assignment)
+            |> Enum.map(fn
+              {var, true} -> var
+              {var, false} -> -var
+            end)
+            |> Enum.sort_by(&abs/1)
 
-    all_vars = Enum.uniq(all_vars)
-
-    Enum.find_value(all_vars, {:error, :unsatisfiable}, fn var ->
-      if solution = find_solution(var, all_vars -- [var], statements) do
-        {:ok, Enum.sort_by(solution, &abs/1)}
+          {:ok, solution}
       end
-    end)
-  end
-
-  defp find_solution(var, other_vars, statements, trail \\ []) do
-    # --- Try var = true
-    case simplify(guess_value(statements, var, true)) do
-      true ->
-        [var | trail]
-
-      false ->
-        # fall through and try var = false
-        try_false(var, other_vars, statements, trail)
-
-      simp_true ->
-        case branch(other_vars, simp_true, [var | trail]) do
-          # <— BACKTRACK
-          nil -> try_false(var, other_vars, statements, trail)
-          sol -> sol
-        end
     end
   end
 
-  defp try_false(var, other_vars, statements, trail) do
-    case simplify(guess_value(statements, var, false)) do
-      true ->
-        [-var | trail]
-
-      false ->
+  defp dpll(clauses, assignment) do
+    case propagate(clauses, assignment) do
+      :conflict ->
         nil
 
-      simp_false ->
-        branch(other_vars, simp_false, [-var | trail])
+      {[], assignment} ->
+        assignment
+
+      {clauses, assignment} ->
+        literal = branch_literal(clauses)
+
+        try_literal(clauses, assignment, literal) ||
+          try_literal(clauses, assignment, -literal)
     end
   end
 
-  defp branch([], _simp, _trail), do: nil
+  defp try_literal(clauses, assignment, literal) do
+    case assign(clauses, MapSet.new([literal])) do
+      :conflict -> nil
+      clauses -> dpll(clauses, record(assignment, literal))
+    end
+  end
 
-  defp branch([next | rest], simp, trail),
-    do: find_solution(next, rest, simp, trail)
+  # Repeatedly assign all unit clauses in one batch until none remain.
+  defp propagate(clauses, assignment) do
+    units =
+      Enum.reduce(clauses, MapSet.new(), fn
+        [literal], acc -> MapSet.put(acc, literal)
+        _clause, acc -> acc
+      end)
 
-  defp simplify(statements) do
-    statements
-    |> Enum.map(fn statement ->
-      simplify_statement(statement)
-    end)
-    |> case do
-      [] ->
-        false
+    cond do
+      MapSet.size(units) == 0 ->
+        {clauses, assignment}
 
-      statements ->
-        cond do
-          Enum.any?(statements, &(&1 == false)) ->
-            false
+      Enum.any?(units, &MapSet.member?(units, -&1)) ->
+        :conflict
 
-          Enum.all?(statements, &(&1 == true)) ->
-            true
+      true ->
+        assignment = Enum.reduce(units, assignment, &record(&2, &1))
 
-          true ->
-            statements
+        case assign(clauses, units) do
+          :conflict -> :conflict
+          clauses -> propagate(clauses, assignment)
         end
     end
   end
 
-  defp simplify_statement(true) do
-    true
-  end
-
-  defp simplify_statement(statement) do
-    if Enum.any?(statement, &true?/1) do
-      true
-    else
-      if Enum.all?(statement, &false?/1) do
-        false
-      else
-        Enum.reject(statement, &false?/1)
+  # Apply a set of true literals to every clause: drop satisfied clauses,
+  # strip falsified literals, conflict if a clause becomes empty.
+  defp assign(clauses, literals) do
+    Enum.reduce_while(clauses, [], fn clause, acc ->
+      case reduce_clause(clause, literals, []) do
+        :satisfied -> {:cont, acc}
+        [] -> {:halt, :conflict}
+        remaining -> {:cont, [remaining | acc]}
       end
-    end
-  end
-
-  defp true?({:const, true}), do: true
-  defp true?(_), do: false
-
-  defp false?({:const, false}), do: true
-  defp false?(_), do: false
-
-  defp guess_value(statements, var, value) do
-    var =
-      if value == true do
-        var
-      else
-        -var
-      end
-
-    Enum.map(statements, fn
-      true ->
-        true
-
-      statement ->
-        Enum.map(statement, fn
-          {:variable, s_var} ->
-            cond do
-              s_var == var ->
-                {:const, true}
-
-              s_var == -var ->
-                {:const, false}
-
-              true ->
-                {:variable, s_var}
-            end
-
-          other ->
-            other
-        end)
     end)
   end
 
-  defp variable(var), do: {:variable, var}
+  defp reduce_clause([], _literals, acc), do: acc
+
+  defp reduce_clause([literal | rest], literals, acc) do
+    cond do
+      MapSet.member?(literals, literal) -> :satisfied
+      MapSet.member?(literals, -literal) -> reduce_clause(rest, literals, acc)
+      true -> reduce_clause(rest, literals, [literal | acc])
+    end
+  end
+
+  # Branch on a literal from the shortest clause — satisfying it removes the
+  # clause, and falsifying it shortens the clause towards a unit.
+  defp branch_literal(clauses) do
+    clauses
+    |> Enum.min_by(&length/1)
+    |> hd()
+  end
+
+  defp record(assignment, literal), do: Map.put(assignment, abs(literal), literal > 0)
+
+  # Variables no clause ended up depending on are unconstrained, so any value
+  # satisfies the formula. Default them to true so the solution covers every
+  # input variable.
+  defp complete(clauses, assignment) do
+    for clause <- clauses, literal <- clause, reduce: assignment do
+      acc -> Map.put_new(acc, abs(literal), true)
+    end
+  end
 end

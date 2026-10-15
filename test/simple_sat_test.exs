@@ -21,7 +21,7 @@ defmodule SimpleSatTest do
   end
 
   test "solves for three variables" do
-    assert {:ok, [2, 3]} = SimpleSat.solve([[1, 3], [2], [1, -2, 3]])
+    assert {:ok, [1, 2, 3]} = SimpleSat.solve([[1, 3], [2], [1, -2, 3]])
   end
 
   test "solves for many variables" do

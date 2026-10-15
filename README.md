@@ -13,7 +13,7 @@ SPDX-License-Identifier: MIT
 
 # SimpleSat
 
-A simple, dependency free boolean satisfiability solver.
+A simple, dependency free boolean satisfiability solver implementing DPLL search.
 
 See the [documentation](https://hexdocs.pm/simple_sat) for more.
 

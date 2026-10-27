@@ -21,7 +21,7 @@ defmodule SimpleSatTest do
   end
 
   test "solves for three variables" do
-    assert {:ok, [2, 3]} = SimpleSat.solve([[1, 3], [2], [1, -2, 3]])
+    assert {:ok, [1, 2, 3]} = SimpleSat.solve([[1, 3], [2], [1, -2, 3]])
   end
 
   test "solves for many variables" do
@@ -36,6 +36,11 @@ defmodule SimpleSatTest do
 
     assert {:ok, [-1, 2, -3, 4, -5]} =
              SimpleSat.solve([[2], [-3], [4, 5], [-4, -1], [-5, -2], [-5, -3]])
+  end
+
+  test "treats an empty clause as unsatisfiable" do
+    assert {:error, :unsatisfiable} = SimpleSat.solve([[]])
+    assert {:error, :unsatisfiable} = SimpleSat.solve([[1], []])
   end
 
   test "solves this crazy example" do
